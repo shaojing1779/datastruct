@@ -2,40 +2,54 @@
 #include"list.h"
 #include<pthread.h>
 #include<unistd.h>
+#include<sstream>
 using namespace std;
 
-void* thread_func(void* arg)
+void* del_func(void* arg)
 {
-    List *li = static_cast<List*>(arg);
+    List<string> *li = static_cast<List<string>*>(arg);
 
-    li->pop();
+    string del_data = li->pop();
+    cout << "Del_data=" << del_data << endl;
+    sleep(1);
 
+    return static_cast<void*>(nullptr);
+}
+
+void* add_func(void* arg)
+{
+    List<string> *li = static_cast<List<string>*>(arg);
+
+    static int i = 0;
+    i++;
+
+    cout << "ADD_data=" << i << endl;
+
+    stringstream ss("");
+    ss << i;
+
+    li->push_back(ss.str());
+
+    sleep(1);
     return static_cast<void*>(nullptr);
 }
 
 int main()
 {
-    List *li = new List();
-    li->push(1);
-    li->push(2);
-    li->push(3);
-    li->push(4);
-    li->push(5);
-    li->push(6);
-    li->push(7);
-    li->print_list();
+    List<string> *li = new List<string>();
 
     int i;
-    pthread_t tid[3];
+    pthread_t tid[4];
     void *tret;
-    for(i = 0; i < 3; i++)
+
+    while(1)
     {
-        pthread_create(&tid[i], nullptr, thread_func, static_cast<void*>(li));
+	    if(i++ > 10) break;
+	    pthread_create(&tid[0], nullptr, add_func, static_cast<void*>(li));
+	    pthread_join(tid[0], &tret);
+	    pthread_create(&tid[1], nullptr, del_func, static_cast<void*>(li));
+	    pthread_join(tid[1], &tret);
     }
 
-    for(i = 0; i < 3; i++)
-        pthread_join(tid[i], &tret);
-
-    li->print_list();
     return 0;
 }
