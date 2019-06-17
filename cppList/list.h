@@ -32,7 +32,12 @@ public:
                 p = p->_next;
             }
         }
+	_size += 1;
         pthread_mutex_unlock(&_mlock);
+    }
+    size_t size()
+    {
+        return _size;
     }
 
     T pop()
@@ -59,9 +64,9 @@ public:
 	                p = p->_next;
 		}
 	} while(0);
+	_size -= 1;
         pthread_mutex_unlock(&_mlock);
 	return t_tmp;
-
     }
 
 private:
@@ -82,6 +87,7 @@ private:
     };
 
     Node* _head = nullptr;
+    size_t _size = 0;
     pthread_mutex_t _mlock = PTHREAD_MUTEX_INITIALIZER;
 };
 
