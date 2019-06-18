@@ -1,22 +1,27 @@
 #include "avl_tree.h"
 #include <time.h>
-  
+#include <unistd.h>
+
 int main() 
 { 
-  struct Node *root = NULL; 
-  
-  do{
-	static int i = 0;
+	struct Node *root = NULL; 
 
 	srand(time(NULL));
-	root = insert(root, rand());
-	if(i >= 10000000) break;
+	root = insert(root, 11);
+	root = insert(root, 32);
+	root = insert(root, 8);
+	root = insert(root, 7);
+	root = insert(root, 21);
 
-  }while(1);
-  
-  preOrder(root); 
+	print_tree(root);
 
-  printf("\n");
-  
-  return 0; 
+	int i = 0;
+	for(;i<10;i++)
+	{
+		sleep(1);
+		root = insert(root, rand()%100);
+		print_tree(root);
+	}
+
+	return 0; 
 }
