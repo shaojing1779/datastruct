@@ -25,6 +25,7 @@ public:
             if(!p->_next)
             {
                 p->_next = n;
+				_size++;
                 break;
             }
             else
@@ -32,7 +33,6 @@ public:
                 p = p->_next;
             }
         }
-		_size += 1;
         pthread_mutex_unlock(&_mlock);
     }
     size_t size()
@@ -52,9 +52,9 @@ public:
 			t_tmp = _head->_next->_t;
 			delete _head->_next;
 			_head->_next = p;
+			_size--;
 
 		} while(0);
-		_size -= 1;
 		pthread_mutex_unlock(&_mlock);
 		return t_tmp;
     }

@@ -3,65 +3,73 @@
 #include<pthread.h>
 #include<unistd.h>
 #include<sstream>
+#include <sys/types.h>
+
 using namespace std;
 
-void* del_func(void* arg)
+List<int> *li = new List<int>();
+
+void* del_func_num(void *)
 {
-    List<string> *li = static_cast<List<string>*>(arg);
+	int j = 0;
+	while(1)
+	{
+		if(j >= 100) break;
 
-    string del_data = li->pop();
-    if(del_data != "")
-	    cout << "Del_data=[" << del_data << "],size=" << li->size() << endl;
-    sleep(0.2);
-
+		if(li->size() > 0)
+		{
+			int del_data = li->pop();
+			cout << "ttid=[" << pthread_self() << "]" << "DEL_NUM_data=[" << del_data << "],size=" << li->size() << endl;
+			j++;
+		}
+	}
     return static_cast<void*>(nullptr);
 }
 
-void* add_func(void* arg)
+void* del_func_all(void *)
 {
-    List<string> *li = static_cast<List<string>*>(arg);
+	while(1)
+	{
+			int del_data = li->pop();
+			if(li->size() > 0)
+					cout << "ttid=[" << pthread_self() << "]" << "DEL_ALL_data=[" << del_data << "],size=" << li->size() << endl;
+	}
+    return static_cast<void*>(nullptr);
+}
 
-    static int i = 0;
-    i++;
+void* add_func(void *)
+{
+	int j = 0;
+	while(1)
+	{
+		if(j >= 100) break;
+		j++;
 
-    cout << "ADD_data=" << i << endl;
+		static int i = 1;
 
-    stringstream ss("");
-    ss << i;
+		li->push_back(i++);
 
-    li->push_back(ss.str());
+		cout << "ttid=[" << pthread_self() << "]" << "ADD_data=" << i << ",size=" << li->size() << endl;
 
-    sleep(0.2);
+	}
     return static_cast<void*>(nullptr);
 }
 
 int main()
 {
-    List<string> *li = new List<string>();
+    pthread_t tid[5];
 
-    int i;
-    pthread_t tid[4];
-    void *tret;
+	pthread_create(&tid[0], nullptr, add_func, nullptr);
+	pthread_create(&tid[1], nullptr, add_func, nullptr);
+	usleep(1);
+	pthread_create(&tid[2], nullptr, del_func_num, nullptr);
 
-    while(1)
-    {
-	    if(i++ > 10) break;
-	    pthread_create(&tid[0], nullptr, add_func, static_cast<void*>(li));
-	    pthread_join(tid[0], &tret);
-	    pthread_create(&tid[2], nullptr, add_func, static_cast<void*>(li));
-	    pthread_join(tid[2], &tret);
-	    pthread_create(&tid[3], nullptr, add_func, static_cast<void*>(li));
-	    pthread_join(tid[3], &tret);
-	    pthread_create(&tid[1], nullptr, del_func, static_cast<void*>(li));
-	    pthread_join(tid[1], &tret);
-    }
+	pthread_join(tid[0], nullptr);
+	pthread_join(tid[1], nullptr);
+	pthread_join(tid[2], nullptr);
 
-    while(1)
-    {
-	    if(li->size() == 0) break;
-	    pthread_create(&tid[0], nullptr, del_func, static_cast<void*>(li));
-	    pthread_join(tid[0], &tret);
-    }
+	pthread_create(&tid[4], nullptr, del_func_all, nullptr);
+	pthread_join(tid[4], nullptr);
 
     return 0;
 }
